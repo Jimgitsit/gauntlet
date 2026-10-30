@@ -40,9 +40,7 @@ export function Wiki() {
           <h1>Cognition</h1>
           <div className="sub">The mental action or process of acquiring, processing, storing, and using knowledge and understanding.</div>
           <div className="sub" style={{ marginTop: 8 }}>
-            This is a knowledge base and persistent storage for your projects.
-            <br />
-            It is maintained by Gauntlet, but is here for your reference as well.
+            This is a knowledge base and persistent storage for your projects. It is maintained by Gauntlet, but is here for your reference as well.
           </div>
         </div>
       </div>
