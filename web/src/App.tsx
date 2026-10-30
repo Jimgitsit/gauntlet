@@ -98,11 +98,20 @@ function Shell({ onSignedOut }: { onSignedOut: () => void }) {
   );
 }
 
+// Same drawing as the tab and home-screen icon (tools/gen-icon.ts): three repo
+// lanes on the dark tile, so the mark reads the same everywhere.
 function Mark() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="5" fill="var(--accent)" />
-      <path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="var(--accent-ink)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="0" y="0" width="24" height="24" rx="5" fill="#15181D" />
+      <rect x="4.5" y="5" width="3" height="3.2" rx="1" fill="#D9483F" />
+      <rect x="8" y="5" width="4" height="3.2" rx="1" fill="#8E78E6" />
+      <rect x="12.5" y="5" width="7" height="3.2" rx="1" fill="#35A063" />
+      <rect x="4.5" y="10.4" width="3.5" height="3.2" rx="1" fill="#8E78E6" />
+      <rect x="8.5" y="10.4" width="2.5" height="3.2" rx="1" fill="#C9841C" />
+      <rect x="11.5" y="10.4" width="4" height="3.2" rx="1" fill="#35A063" />
+      <rect x="4.5" y="15.8" width="2" height="3.2" rx="1" fill="#D9483F" />
+      <rect x="7" y="15.8" width="4.5" height="3.2" rx="1" fill="#35A063" />
     </svg>
   );
 }
