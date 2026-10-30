@@ -16,7 +16,7 @@ round and writes back to when it learns it was wrong.
 | Providers | `src/providers/github.ts`, `gitlab.ts`, `mock.ts` | Webhook verify/parse, diff fetch, posting findings. A repo without a token uses the mock |
 | Team wiki | `src/reviewer/wiki.ts` | `index.md`, `REVIEW.md`, `conventions.md`, per-repo pages, a change log |
 | Seed data | `src/seed/` | 14 repos, 3200 open and 2600 merged changes with reviews and findings |
-| Dashboard | `web/` | React + Vite, History router under `/code-reviewer/` |
+| Dashboard | `web/` | React + Vite, History router under `/gauntlet/` |
 
 ## Run
 
@@ -24,7 +24,7 @@ round and writes back to when it learns it was wrong.
 bun install && (cd web && bun install)
 bun run seed          # wipes and refills data/gauntlet.db
 bun run build         # builds web/dist
-bun run start         # http://127.0.0.1:8080/code-reviewer/
+bun run start         # http://127.0.0.1:8080/gauntlet/
 ```
 
 Environment:
@@ -34,7 +34,7 @@ Environment:
 | `ANTHROPIC_API_KEY` | unset | Set it and reviews run on Claude. Unset, the mock model reviews the mock diffs |
 | `REVIEW_HUNTER_MODEL`, `REVIEW_VOTER_MODEL`, `REVIEW_CLASSIFIER_MODEL` | `claude-opus-5-5` | Per-role model ids |
 | `PORT`, `HOST` | `8080`, `127.0.0.1` | |
-| `BASE_PATH` | `/code-reviewer` | Mount path, must match `web/vite.config.ts` `base` |
+| `BASE_PATH` | `/gauntlet` | Mount path, must match `web/vite.config.ts` `base` |
 | `DB_PATH` | `data/gauntlet.db` | |
 | `WORKER_CONCURRENCY` | `2` | Reviews running at once |
 | `COOKIE_SECURE` | unset | Force the Secure cookie flag; set automatically behind an https proxy |

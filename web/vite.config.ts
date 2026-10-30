@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  base: "/code-reviewer/",
+  base: "/gauntlet/",
   plugins: [react()],
   build: {
     outDir: "dist",
@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     port: 58031,
     proxy: {
-      "/code-reviewer/api": "http://127.0.0.1:8080",
+      "/gauntlet/api": "http://127.0.0.1:8080",
     },
   },
 });

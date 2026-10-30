@@ -7,7 +7,7 @@ export const config = {
   port: Number(env.PORT ?? 8080),
   host: env.HOST ?? "127.0.0.1",
   // URL prefix the app is mounted under (nginx passes it through).
-  base: (env.BASE_PATH ?? "/code-reviewer").replace(/\/$/, ""),
+  base: (env.BASE_PATH ?? "/gauntlet").replace(/\/$/, ""),
   dbPath: env.DB_PATH ?? "data/gauntlet.db",
   // "claude" calls the API; "mock" runs the same pipeline on a deterministic stand-in.
   llm: (env.LLM ?? (env.ANTHROPIC_API_KEY ? "claude" : "mock")) as "claude" | "mock",
