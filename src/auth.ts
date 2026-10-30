@@ -90,8 +90,26 @@ export class AuthError extends Error {}
 export type AuthEnv = { Variables: { user: User & { org: Org } } };
 
 /** Hono middleware: attaches the signed-in user or answers 401. */
+// With DEMO_USER set, anyone who is not signed in acts as that user.
+function demoUser(): (User & { org: Org; demo: true }) | null {
+  if (!config.demoUser) {
+    return null;
+  }
+  const d = db();
+  const user = d.query<User, [string]>("SELECT id, org_id, email, name, role FROM users WHERE email = ?").get(config.demoUser);
+  const org = user ? d.query<Org, [number]>("SELECT * FROM orgs WHERE id = ?").get(user.org_id) : null;
+  if (!user || !org) {
+    return null;
+  }
+  return { ...user, org, demo: true };
+}
+
+export function currentUser(token: string | undefined): (User & { org: Org; demo?: true }) | null {
+  return userForToken(token) ?? demoUser();
+}
+
 export const requireUser = createMiddleware<AuthEnv>(async (c, next) => {
-  const user = userForToken(getCookie(c, COOKIE));
+  const user = currentUser(getCookie(c, COOKIE));
   if (!user) {
     return c.json({ error: "Sign in to continue." }, 401);
   }

@@ -6,6 +6,11 @@ finding must be answered), risk-tiered (the change, not the author, decides how
 many people must look), and backed by a team wiki the reviewer reads before each
 round and writes back to when it learns it was wrong.
 
+**Live demo: https://jimmcgowen.com/gauntlet/** — seeded with 14 repositories and
+3,200 open changes, reviewed by a deterministic stand-in for the model. No sign-in
+needed; resolve findings, approve changes, and edit the team wiki to see the reviewer
+learn.
+
 ## What is in the box
 
 | Piece | Where | Notes |
@@ -38,6 +43,7 @@ Environment:
 | `DB_PATH` | `data/gauntlet.db` | |
 | `WORKER_CONCURRENCY` | `2` | Reviews running at once |
 | `COOKIE_SECURE` | unset | Force the Secure cookie flag; set automatically behind an https proxy |
+| `DEMO_USER` | unset | Email of a seeded user that every visitor acts as, with no sign-in. Public demos only |
 
 `bun run typecheck` checks both the server and the dashboard.
 

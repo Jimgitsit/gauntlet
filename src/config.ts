@@ -25,6 +25,8 @@ export const config = {
   // After this many rounds the reviewer asks the author to step back.
   roundCap: 3,
   sessionDays: 30,
+  // Email of a user every unauthenticated request acts as. For public demos only.
+  demoUser: env.DEMO_USER ?? "",
 };
 
 export type Depth = keyof typeof config.depth;

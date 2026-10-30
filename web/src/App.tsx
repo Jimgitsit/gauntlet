@@ -73,16 +73,20 @@ function Shell({ onSignedOut }: { onSignedOut: () => void }) {
         <div className="who">
           <strong>{user.org.name}</strong>
           {user.email}
-          <div style={{ marginTop: 6 }}>
-            <button
-              className="btn small"
-              onClick={() => {
-                post("/auth/logout").then(onSignedOut);
-              }}
-            >
-              Sign out
-            </button>
-          </div>
+          {user.demo ? (
+            <div style={{ marginTop: 6 }}>Public demo on seeded data. Click around, resolve findings, edit the wiki.</div>
+          ) : (
+            <div style={{ marginTop: 6 }}>
+              <button
+                className="btn small"
+                onClick={() => {
+                  post("/auth/logout").then(onSignedOut);
+                }}
+              >
+                Sign out
+              </button>
+            </div>
+          )}
         </div>
       </nav>
       <main className="main">{page}</main>

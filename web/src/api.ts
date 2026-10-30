@@ -100,6 +100,8 @@ export interface User {
   name: string;
   role: string;
   org: { id: number; slug: string; name: string };
+  /** Set when the server signed this visitor in automatically for a public demo. */
+  demo?: true;
 }
 
 export type Status = "queued" | "reviewing" | "author" | "human" | "ready" | "blocked";

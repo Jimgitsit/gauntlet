@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
-import { AuthError, type AuthEnv, COOKIE, clearSessionCookie, destroySession, login, requireUser, setSessionCookie, signup, userForToken } from "../auth";
+import { AuthError, type AuthEnv, COOKIE, clearSessionCookie, currentUser, destroySession, login, requireUser, setSessionCookie, signup, userForToken } from "../auth";
 import { db, nowIso } from "../db";
 import { providerFor, webhookProvider } from "../providers";
 import { statusFrom } from "../reviewer/engine";
@@ -50,7 +50,7 @@ api.post("/auth/logout", (c) => {
 });
 
 api.get("/auth/me", (c) => {
-  const user = userForToken(getCookie(c, COOKIE));
+  const user = currentUser(getCookie(c, COOKIE));
   return c.json({ user });
 });
 
