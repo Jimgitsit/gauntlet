@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     port: 58031,
     proxy: {
-      "/code-reviewer/api": "http://127.0.0.1:58041",
+      "/code-reviewer/api": "http://127.0.0.1:8080",
     },
   },
 });

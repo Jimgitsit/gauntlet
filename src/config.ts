@@ -4,7 +4,7 @@
 const env = Bun.env;
 
 export const config = {
-  port: Number(env.PORT ?? 58041),
+  port: Number(env.PORT ?? 8080),
   host: env.HOST ?? "127.0.0.1",
   // URL prefix the app is mounted under (nginx passes it through).
   base: (env.BASE_PATH ?? "/code-reviewer").replace(/\/$/, ""),

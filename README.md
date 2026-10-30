@@ -6,9 +6,6 @@ finding must be answered), risk-tiered (the change, not the author, decides how
 many people must look), and backed by a team wiki the reviewer reads before each
 round and writes back to when it learns it was wrong.
 
-Served at `jimmcgowen.com/code-reviewer/` (bun on `:58041`, launchd
-`com.jim.code-reviewer`). Demo login `demo@gauntlet.dev` / `review-the-gauntlet`.
-
 ## What is in the box
 
 | Piece | Where | Notes |
@@ -27,7 +24,7 @@ Served at `jimmcgowen.com/code-reviewer/` (bun on `:58041`, launchd
 bun install && (cd web && bun install)
 bun run seed          # wipes and refills data/gauntlet.db
 bun run build         # builds web/dist
-bun run start         # http://127.0.0.1:58041/code-reviewer/
+bun run start         # http://127.0.0.1:8080/code-reviewer/
 ```
 
 Environment:
@@ -36,7 +33,7 @@ Environment:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | unset | Set it and reviews run on Claude. Unset, the mock model reviews the mock diffs |
 | `REVIEW_HUNTER_MODEL`, `REVIEW_VOTER_MODEL`, `REVIEW_CLASSIFIER_MODEL` | `claude-opus-5-5` | Per-role model ids |
-| `PORT`, `HOST` | `58041`, `127.0.0.1` | |
+| `PORT`, `HOST` | `8080`, `127.0.0.1` | |
 | `BASE_PATH` | `/code-reviewer` | Mount path, must match `web/vite.config.ts` `base` |
 | `DB_PATH` | `data/gauntlet.db` | |
 | `WORKER_CONCURRENCY` | `2` | Reviews running at once |
