@@ -1109,7 +1109,7 @@ pre code {
 
 .tree li a {
   display: block;
-  padding: 4px 14px;
+  padding: 4px 14px 4px 24px;
   color: var(--ink-2);
   white-space: nowrap;
   overflow: hidden;
@@ -1123,8 +1123,8 @@ pre code {
   background: var(--surface-2);
 }
 
-.tree li.dir {
-  padding: 8px 14px 2px;
+.tree .dir {
+  padding: 10px 14px 2px;
   color: var(--ink-3);
   font-size: 12px;
 }
