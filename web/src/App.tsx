@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api, post, type User } from "./api";
+import { PLATES, TILE } from "./mark";
 import { href, usePath } from "./router";
 import { ChangeDetail } from "./pages/ChangeDetail";
 import { ChangeList } from "./pages/ChangeList";
@@ -98,20 +99,14 @@ function Shell({ onSignedOut }: { onSignedOut: () => void }) {
   );
 }
 
-// Same drawing as the tab and home-screen icon (tools/gen-icon.ts): three repo
-// lanes on the dark tile, so the mark reads the same everywhere.
+// Same drawing as the tab and home-screen icon; the plates live in mark.ts.
 function Mark() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="0" y="0" width="24" height="24" rx="5" fill="#15181D" />
-      <rect x="4.5" y="5" width="3" height="3.2" rx="1" fill="#D9483F" />
-      <rect x="8" y="5" width="4" height="3.2" rx="1" fill="#8E78E6" />
-      <rect x="12.5" y="5" width="7" height="3.2" rx="1" fill="#35A063" />
-      <rect x="4.5" y="10.4" width="3.5" height="3.2" rx="1" fill="#8E78E6" />
-      <rect x="8.5" y="10.4" width="2.5" height="3.2" rx="1" fill="#C9841C" />
-      <rect x="11.5" y="10.4" width="4" height="3.2" rx="1" fill="#35A063" />
-      <rect x="4.5" y="15.8" width="2" height="3.2" rx="1" fill="#D9483F" />
-      <rect x="7" y="15.8" width="4.5" height="3.2" rx="1" fill="#35A063" />
+      <rect x="0" y="0" width="24" height="24" rx="5" fill={TILE} />
+      {PLATES.map((p, i) => (
+        <rect key={i} x={p.x} y={p.y} width={p.w} height={p.h} rx={p.r} fill={p.fill} transform={p.rot ? `rotate(${p.rot} ${p.x + p.w / 2} ${p.y + p.h / 2})` : undefined} />
+      ))}
     </svg>
   );
 }

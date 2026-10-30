@@ -1,11 +1,13 @@
-// Renders web/public/apple-touch-icon.png for Gauntlet: three repo "lanes"
-// (the dashboard's signature element) on the dark surface. Self-contained:
-// analytic anti-aliasing plus a hand-rolled PNG encoder, no native deps.
+// Renders web/public/apple-touch-icon.png from the plates in web/src/mark.ts:
+// the same armored fist the sidebar draws. Self-contained rasterizer with
+// analytic anti-aliasing and a hand-rolled PNG encoder, no native deps.
 // Run: bun tools/gen-icon.ts
 
 import { deflateSync } from "node:zlib";
+import { PLATES, TILE, type Plate } from "../web/src/mark";
 
 const SIZE = 180;
+const SCALE = SIZE / 24;
 const OUT = new URL("../web/public/apple-touch-icon.png", import.meta.url);
 
 type RGB = [number, number, number];
@@ -13,61 +15,45 @@ const hex = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
-// Dark-mode status palette from web/src/styles.css.
-const BG = hex("#15181D");
-const BLOCKED = hex("#D9483F");
-const HUMAN = hex("#8E78E6");
-const READY = hex("#35A063");
-const AUTHOR = hex("#C9841C");
-
-// Coverage of an axis-aligned rounded rectangle, 1px anti-aliased edge.
-function roundedRect(px: number, py: number, x: number, y: number, w: number, h: number, r: number): number {
-  const cx = clamp(px + 0.5, x + r, x + w - r);
-  const cy = clamp(py + 0.5, y + r, y + h - r);
-  const d = Math.hypot(px + 0.5 - cx, py + 0.5 - cy) - r;
+// Coverage of a rounded rectangle at pixel (px, py), 1px anti-aliased edge.
+// The rectangle may be rotated about its centre.
+function plateCoverage(px: number, py: number, p: Plate): number {
+  const cx = (p.x + p.w / 2) * SCALE;
+  const cy = (p.y + p.h / 2) * SCALE;
+  let dx = px + 0.5 - cx;
+  let dy = py + 0.5 - cy;
+  if (p.rot) {
+    const a = (-p.rot * Math.PI) / 180;
+    const rx = dx * Math.cos(a) - dy * Math.sin(a);
+    const ry = dx * Math.sin(a) + dy * Math.cos(a);
+    dx = rx;
+    dy = ry;
+  }
+  const hw = (p.w / 2) * SCALE;
+  const hh = (p.h / 2) * SCALE;
+  const r = p.r * SCALE;
+  const qx = Math.abs(dx) - hw + r;
+  const qy = Math.abs(dy) - hh + r;
+  const outside = Math.hypot(Math.max(qx, 0), Math.max(qy, 0));
+  const inside = Math.min(Math.max(qx, qy), 0);
+  const d = outside + inside - r;
   return clamp(0.5 - d, 0, 1);
 }
 
-interface Segment {
-  color: RGB;
-  share: number;
-}
-
-// Each lane: total width as a share of the drawable width, then its segments.
-const LANES: { width: number; segments: Segment[] }[] = [
-  { width: 1, segments: [{ color: BLOCKED, share: 0.22 }, { color: HUMAN, share: 0.3 }, { color: READY, share: 0.48 }] },
-  { width: 0.72, segments: [{ color: HUMAN, share: 0.35 }, { color: AUTHOR, share: 0.25 }, { color: READY, share: 0.4 }] },
-  { width: 0.5, segments: [{ color: BLOCKED, share: 0.3 }, { color: READY, share: 0.7 }] },
-];
-
-const PAD = 34;
-const LANE_H = 24;
-const GAP_Y = 20;
-const GAP_X = 3;
-const RADIUS = 6;
-const drawable = SIZE - PAD * 2;
-const totalH = LANES.length * LANE_H + (LANES.length - 1) * GAP_Y;
-const top = (SIZE - totalH) / 2;
-
+const bg = hex(TILE);
 const buf = Buffer.alloc(SIZE * SIZE * 4);
 for (let py = 0; py < SIZE; py++) {
   for (let px = 0; px < SIZE; px++) {
-    const col: RGB = [BG[0], BG[1], BG[2]];
-    LANES.forEach((lane, li) => {
-      const y = top + li * (LANE_H + GAP_Y);
-      const laneW = drawable * lane.width;
-      let x = PAD;
-      for (const seg of lane.segments) {
-        const w = laneW * seg.share - GAP_X;
-        const cov = roundedRect(px, py, x, y, w, LANE_H, RADIUS);
-        if (cov > 0) {
-          for (let i = 0; i < 3; i++) {
-            col[i] = mix(col[i], seg.color[i], cov);
-          }
+    const col: RGB = [bg[0], bg[1], bg[2]];
+    for (const p of PLATES) {
+      const cov = plateCoverage(px, py, p);
+      if (cov > 0) {
+        const c = hex(p.fill);
+        for (let i = 0; i < 3; i++) {
+          col[i] = mix(col[i], c[i], cov);
         }
-        x += laneW * seg.share;
       }
-    });
+    }
     const o = (py * SIZE + px) * 4;
     buf[o] = Math.round(col[0]);
     buf[o + 1] = Math.round(col[1]);
