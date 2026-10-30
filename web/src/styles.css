@@ -364,6 +364,45 @@ pre code {
   padding: 12px 14px;
 }
 
+.panel-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.panel-toggle h2 {
+  margin: 0;
+}
+
+.panel-toggle .chev {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--ink-3);
+  border-bottom: 1.5px solid var(--ink-3);
+  transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform 120ms ease;
+}
+
+.panel.collapsed .panel-toggle .chev {
+  transform: rotate(-45deg);
+}
+
+.panel.collapsed .panel-head {
+  border-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-toggle .chev {
+    transition: none;
+  }
+}
+
 /* ---------- login ---------- */
 
 .login {
@@ -705,44 +744,6 @@ pre code {
   background: var(--c);
 }
 
-/* ---------- attention list ---------- */
-
-.attn {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.attn li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.attn li:last-child {
-  border-bottom: 0;
-}
-
-.attn .t {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.attn .r {
-  grid-column: 1 / -1;
-  color: var(--ink-3);
-  font-size: 12.5px;
-}
-
-.attn .age {
-  color: var(--ink-3);
-  font-variant-numeric: tabular-nums;
-  font-size: 12.5px;
-}
-
 /* ---------- filters + table ---------- */
 
 .filters {
@@ -794,7 +795,7 @@ pre code {
 .thead,
 .tr {
   display: grid;
-  grid-template-columns: 120px minmax(180px, 1fr) 90px 125px 210px 82px 52px 84px 54px;
+  grid-template-columns: 120px minmax(180px, 1fr) 90px 125px 200px 82px 52px 84px 68px;
   gap: 10px;
   align-items: center;
   padding: 0 12px;

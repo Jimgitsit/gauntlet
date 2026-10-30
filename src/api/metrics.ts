@@ -1,5 +1,5 @@
-// Numbers for the dashboard header: where attention is needed now, how the
-// flow of changes is moving, and whether the reviewer is pulling its weight.
+// Numbers for the dashboard: how the flow of changes is moving and whether
+// the reviewer is pulling its weight.
 
 import { db } from "../db";
 
@@ -11,7 +11,6 @@ export interface Overview {
   lanes: RepoLane[];
   days: DayPoint[];
   review: ReviewMetrics;
-  attention: AttentionItem[];
 }
 
 export interface RepoLane {
@@ -45,16 +44,6 @@ export interface ReviewMetrics {
   humans_per_change: { median: number; p95: number };
   zero_human_share: number;
   tokens_30d: { in: number; out: number };
-}
-
-export interface AttentionItem {
-  id: number;
-  repo: string;
-  number: number;
-  title: string;
-  status: string;
-  reason: string;
-  hours: number;
 }
 
 export function overview(orgId: number): Overview {
@@ -170,27 +159,7 @@ export function overview(orgId: number): Overview {
     tokens_30d: { in: tokens.tin, out: tokens.tout },
   };
 
-  // What needs a person most urgently.
-  const attention: AttentionItem[] = d
-    .query<{ id: number; repo: string; number: number; title: string; status: string; waiting_since: string | null; sec: number; rounds: number }, [number]>(
-      `SELECT c.id, r.full_name AS repo, c.number, c.title, c.status, c.waiting_since, c.rounds,
-              (SELECT count(*) FROM findings f WHERE f.change_id = c.id AND f.status = 'open' AND f.category IN ('security','data-loss')) AS sec
-       FROM changes c JOIN repos r ON r.id = c.repo_id
-       WHERE r.org_id = ? AND c.state = 'open' AND c.status IN ('blocked','human')
-       ORDER BY CASE c.status WHEN 'blocked' THEN 0 ELSE 1 END, c.waiting_since ASC LIMIT 8`,
-    )
-    .all(orgId)
-    .map((r) => ({
-      id: r.id,
-      repo: r.repo,
-      number: r.number,
-      title: r.title,
-      status: r.status,
-      hours: r.waiting_since ? Math.round((now - Date.parse(r.waiting_since)) / 3600_000) : 0,
-      reason: r.status === "blocked" ? (r.sec > 0 ? `${r.sec} open security finding${r.sec === 1 ? "" : "s"}` : "CI is red") : `Waiting for a reviewer${r.rounds >= 3 ? ` after ${r.rounds} rounds` : ""}`,
-    }));
-
-  return { generated_at: new Date().toISOString(), model: "", counts, open_total: openTotal, lanes, days, review, attention };
+  return { generated_at: new Date().toISOString(), model: "", counts, open_total: openTotal, lanes, days, review };
 }
 
 function quantile(sorted: number[], q: number): number {

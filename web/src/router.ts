@@ -25,10 +25,15 @@ export function navigate(path: string, replace = false): void {
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
-export function usePath(): string {
-  const [path, setPath] = useState(currentPath());
+function currentLocation(): string {
+  return `${currentPath()}${window.location.search}`;
+}
+
+/** Path and query string together; re-renders when either changes. */
+export function useLocation(): { path: string; search: string } {
+  const [loc, setLoc] = useState(currentLocation());
   useEffect(() => {
-    const onPop = () => setPath(currentPath());
+    const onPop = () => setLoc(currentLocation());
     window.addEventListener("popstate", onPop);
     const onClick = (e: MouseEvent) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
@@ -51,12 +56,16 @@ export function usePath(): string {
       document.removeEventListener("click", onClick);
     };
   }, []);
-  return path;
+  const i = loc.indexOf("?");
+  return i === -1 ? { path: loc, search: "" } : { path: loc.slice(0, i), search: loc.slice(i) };
+}
+
+export function usePath(): string {
+  return useLocation().path;
 }
 
 export function useQuery(): URLSearchParams {
-  usePath();
-  return new URLSearchParams(window.location.search);
+  return new URLSearchParams(useLocation().search);
 }
 
 export function setQuery(params: Record<string, string | null>): void {

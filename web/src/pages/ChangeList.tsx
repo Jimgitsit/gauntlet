@@ -1,15 +1,14 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { type ChangeRow, type Overview, type Status, useFetch } from "../api";
-import { Flow } from "../components/Flow";
-import { Lanes } from "../components/Lanes";
+import { StatTiles, openSummary } from "../components/StatTiles";
 import { StatusPill } from "../components/StatusPill";
-import { STATUS_HINT, STATUS_LABEL, STATUS_ORDER, ago, compact, hours, pct, shortRepo } from "../format";
+import { STATUS_LABEL, STATUS_ORDER, ago, compact, shortRepo, updated } from "../format";
 import { href, setQuery, useQuery } from "../router";
 
 type SortKey = "updated" | "age" | "wait" | "findings" | "size" | "rounds" | "repo";
 
-export function Changes() {
+export function ChangeList() {
   const q = useQuery();
   const status = (q.get("status") as Status | null) ?? null;
   const repoId = q.get("repo") ? Number(q.get("repo")) : null;
@@ -71,7 +70,6 @@ export function Changes() {
   // First click on a numeric column shows the biggest values; on repo and wait, A to Z and longest wait.
   const toggleSort = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: key === "repo" || key === "wait" || key === "age" ? 1 : -1 }));
 
-  const counts = ov.data?.counts;
   const activeLane = ov.data?.lanes.find((l) => l.repo_id === repoId);
   const anyFilter = status || repoId !== null || risk || author || search;
 
@@ -79,87 +77,17 @@ export function Changes() {
     <div>
       <div className="page-head">
         <div>
-          <h1>Open changes</h1>
-          <div className="sub">
-            {ov.data ? `${ov.data.open_total.toLocaleString()} open across ${ov.data.lanes.length} repositories` : "Loading"}
-            {ov.data && ov.data.counts.reviewing + ov.data.counts.queued > 0 ? `, ${ov.data.counts.reviewing} in review and ${ov.data.counts.queued} queued` : ""}
-          </div>
+          <h1>Change list</h1>
+          <div className="sub">{openSummary(ov.data)}</div>
         </div>
         {ov.data && (
           <div className="muted" style={{ fontSize: 12.5 }}>
-            Updated {ago(ov.data.generated_at)} ago
+            {updated(ov.data.generated_at)}
           </div>
         )}
       </div>
 
-      <div className={`stats${ov.loading && ov.data ? " stale" : ""}`}>
-        {STATUS_ORDER.map((s) => (
-          <button key={s} className={`stat${status === s ? " active" : ""}`} onClick={() => setQuery({ status: status === s ? null : s })} title={STATUS_HINT[s]}>
-            <span className="n" style={{ color: `var(--s-${s})` }}>
-              {counts ? counts[s].toLocaleString() : ""}
-            </span>
-            <span className="l">{STATUS_LABEL[s]}</span>
-            <span className="h">{STATUS_HINT[s]}</span>
-          </button>
-        ))}
-      </div>
-
-      {ov.data && (
-        <div className="two-col">
-          <div className="panel">
-            <div className="panel-head">
-              <h2>By repository</h2>
-              <span className="muted" style={{ fontSize: 12.5 }}>
-                Sorted by how many need a person. Click a repo or a segment to filter.
-              </span>
-            </div>
-            <div className="panel-body">
-              <Lanes lanes={ov.data.lanes} activeRepo={repoId} onPick={(r, s) => setQuery({ repo: r === null ? null : String(r), status: s })} />
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            <div className="panel">
-              <div className="panel-head">
-                <h2>Needs a person now</h2>
-                <span className="muted" style={{ fontSize: 12.5 }}>
-                  Longest waits first
-                </span>
-              </div>
-              <div className="panel-body">
-                {ov.data.attention.length === 0 ? (
-                  <div className="muted">Nothing is blocked or waiting on a reviewer.</div>
-                ) : (
-                  <ul className="attn">
-                    {ov.data.attention.map((a) => (
-                      <li key={a.id}>
-                        <a className="t" href={href(`/changes/${a.id}`)} title={a.title}>
-                          <span className="muted">{shortRepo(a.repo)} #{a.number}</span> {a.title}
-                        </a>
-                        <span className="age">{hours(a.hours)}</span>
-                        <span className="r">
-                          <StatusPill status={a.status} /> {a.reason}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
-            <div className="panel">
-              <div className="panel-head">
-                <h2>Last 14 days</h2>
-                <span className="muted" style={{ fontSize: 12.5 }}>
-                  {ov.data.review.merged_30d.toLocaleString()} merged in 30 days, {pct(ov.data.review.revert_rate)} reverted
-                </span>
-              </div>
-              <div className="panel-body">
-                <Flow days={ov.data.days} />
-              </div>
-            </div>
-            <ReviewHealth ov={ov.data} />
-          </div>
-        </div>
-      )}
+      <StatTiles overview={ov.data} stale={ov.loading && Boolean(ov.data)} active={status} onPick={(s) => setQuery({ status: status === s ? null : s })} />
 
       <div className="filters">
         <input type="search" placeholder="Search title, author, repo or number" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Search changes" />
@@ -208,69 +136,6 @@ export function Changes() {
       </div>
 
       <Table rows={rows} sort={sort} onSort={toggleSort} loading={list.loading && !list.data} />
-    </div>
-  );
-}
-
-function ReviewHealth({ ov }: { ov: Overview }) {
-  const r = ov.review;
-  const o = r.outcomes;
-  const total = Math.max(1, o.fixed + o.wrong + o.intentional + o.irrelevant);
-  const parts: { k: string; label: string; c: string }[] = [
-    { k: "fixed", label: "fixed", c: "var(--s-ready)" },
-    { k: "intentional", label: "intentional", c: "var(--s-author)" },
-    { k: "wrong", label: "wrong", c: "var(--s-blocked)" },
-    { k: "irrelevant", label: "did not matter", c: "var(--s-queued)" },
-  ];
-  return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2>Is the reviewer earning its keep?</h2>
-        <span className="muted" style={{ fontSize: 12.5 }}>
-          Last 30 days
-        </span>
-      </div>
-      <div className="panel-body">
-        <dl className="kv">
-          <dt>Passed after one round</dt>
-          <dd>{pct(r.first_round_pass_rate)}</dd>
-          <dt>Needed five or more rounds</dt>
-          <dd>{pct(r.five_plus_rounds_rate)}</dd>
-          <dt>Mean rounds to pass</dt>
-          <dd>{r.mean_rounds_to_pass.toFixed(2)}</dd>
-          <dt>Changes with substantive findings</dt>
-          <dd>{pct(r.substantive_rate)}</dd>
-          <dt>Merged with no human approval</dt>
-          <dd>{pct(r.zero_human_share)}</dd>
-          <dt>Humans per change, median / p95</dt>
-          <dd>
-            {r.humans_per_change.median} / {r.humans_per_change.p95}
-          </dd>
-          <dt>Waiting on a person now, median / p95</dt>
-          <dd>
-            {hours(r.wait_on_human_hours.median)} / {hours(r.wait_on_human_hours.p95)}
-          </dd>
-          <dt>Tokens spent</dt>
-          <dd>
-            {compact(r.tokens_30d.in)} in, {compact(r.tokens_30d.out)} out
-          </dd>
-        </dl>
-        <div className="outcomes" aria-hidden="true">
-          {parts.map((p) => (
-            <span key={p.k} style={{ flex: o[p.k] || 0, "--c": p.c } as React.CSSProperties} />
-          ))}
-        </div>
-        <div className="legend">
-          {parts.map((p) => (
-            <span key={p.k} style={{ "--c": p.c } as React.CSSProperties}>
-              {p.label} {pct((o[p.k] || 0) / total)}
-            </span>
-          ))}
-        </div>
-        <div className="muted" style={{ fontSize: 12.5, marginTop: 6 }}>
-          How authors answered {total.toLocaleString()} resolved findings. "Wrong" is the reviewer's false-positive rate.
-        </div>
-      </div>
     </div>
   );
 }

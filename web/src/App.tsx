@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { api, post, type User } from "./api";
 import { href, usePath } from "./router";
 import { ChangeDetail } from "./pages/ChangeDetail";
-import { Changes } from "./pages/Changes";
+import { ChangeList } from "./pages/ChangeList";
+import { Dashboard } from "./pages/Dashboard";
 import { Login } from "./pages/Login";
 import { Repos } from "./pages/Repos";
 import { Wiki } from "./pages/Wiki";
@@ -40,22 +41,25 @@ export function App() {
 function Shell({ onSignedOut }: { onSignedOut: () => void }) {
   const path = usePath();
   const user = useUser();
-  const section = path.split("/")[1] || "changes";
+  const section = path.split("/")[1] || "dashboard";
   let page: React.ReactNode;
   const changeMatch = /^\/changes\/(\d+)$/.exec(path);
   if (changeMatch) {
     page = <ChangeDetail id={Number(changeMatch[1])} />;
+  } else if (section === "changes") {
+    page = <ChangeList />;
   } else if (section === "repos") {
     page = <Repos />;
   } else if (section === "wiki") {
     page = <Wiki />;
   } else {
-    page = <Changes />;
+    page = <Dashboard />;
   }
   const nav = [
-    { to: "/", label: "Changes", key: "changes" },
+    { to: "/", label: "Dashboard", key: "dashboard" },
+    { to: "/changes", label: "Change list", key: "changes" },
     { to: "/repos", label: "Repositories", key: "repos" },
-    { to: "/wiki", label: "Team wiki", key: "wiki" },
+    { to: "/wiki", label: "Cognition", key: "wiki" },
   ];
   return (
     <div className="shell">
@@ -65,7 +69,7 @@ function Shell({ onSignedOut }: { onSignedOut: () => void }) {
           Gauntlet
         </a>
         {nav.map((n) => (
-          <a key={n.key} className={`nav${section === n.key || (n.key === "changes" && section === "") ? " active" : ""}`} href={href(n.to)}>
+          <a key={n.key} className={`nav${section === n.key ? " active" : ""}`} href={href(n.to)}>
             {n.label}
           </a>
         ))}

@@ -156,7 +156,6 @@ export interface Overview {
     zero_human_share: number;
     tokens_30d: { in: number; out: number };
   };
-  attention: { id: number; repo: string; number: number; title: string; status: Status; reason: string; hours: number }[];
 }
 
 export interface Finding {

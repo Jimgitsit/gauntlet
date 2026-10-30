@@ -39,6 +39,12 @@ export function ago(iso: string | null | undefined): string {
   return `${Math.round(h / 24)}d`;
 }
 
+/** "Updated just now" or "Updated 3m ago". */
+export function updated(iso: string): string {
+  const a = ago(iso);
+  return a === "now" ? "Updated just now" : `Updated ${a} ago`;
+}
+
 export function hours(h: number): string {
   if (h < 1) {
     return "<1h";

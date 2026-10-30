@@ -37,8 +37,8 @@ export function Wiki() {
     <div>
       <div className="page-head">
         <div>
-          <h1>Team wiki</h1>
-          <div className="sub">What the reviewer knows about your code. It reads these pages before every review and writes back what it learns.</div>
+          <h1>Cognition</h1>
+          <div className="sub">The mental action or process of acquiring, processing, storing, and using knowledge and understanding.</div>
         </div>
       </div>
       <div className="wiki">

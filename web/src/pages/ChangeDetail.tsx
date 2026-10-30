@@ -44,14 +44,14 @@ export function ChangeDetail({ id }: { id: number }) {
       <div className="page-head detail-head">
         <div>
           <div className="muted" style={{ fontSize: 13 }}>
-            <a href={href(`/?repo=${repo.id}`)}>{repo.full_name}</a> · {repo.provider === "gitlab" ? "merge request" : "pull request"}{" "}
+            <a href={href(`/changes?repo=${repo.id}`)}>{repo.full_name}</a> · {repo.provider === "gitlab" ? "merge request" : "pull request"}{" "}
             <a href={change.html_url} target="_blank" rel="noreferrer">
               #{change.number}
             </a>
           </div>
           <h1>{change.title}</h1>
           <div className="meta">
-            <a href={href(`/?author=${encodeURIComponent(change.author)}`)}>{change.author}</a>
+            <a href={href(`/changes?author=${encodeURIComponent(change.author)}`)}>{change.author}</a>
             {change.author_is_agent ? " (agent)" : ""}, opened {ago(change.opened_at)} ago, {change.files_changed} files, <span style={{ color: "var(--s-ready)" }}>+{compact(change.additions)}</span>{" "}
             <span style={{ color: "var(--s-blocked)" }}>−{compact(change.deletions)}</span>, into {change.base_branch}
           </div>
