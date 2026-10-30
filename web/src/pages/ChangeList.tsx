@@ -77,7 +77,7 @@ export function ChangeList() {
     <div>
       <div className="page-head">
         <div>
-          <h1>Change list</h1>
+          <h1>Changes</h1>
           <div className="sub">{openSummary(ov.data)}</div>
         </div>
         {ov.data && (

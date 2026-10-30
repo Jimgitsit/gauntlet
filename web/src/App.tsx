@@ -57,7 +57,7 @@ function Shell({ onSignedOut }: { onSignedOut: () => void }) {
   }
   const nav = [
     { to: "/", label: "Dashboard", key: "dashboard" },
-    { to: "/changes", label: "Change list", key: "changes" },
+    { to: "/changes", label: "Changes", key: "changes" },
     { to: "/repos", label: "Repositories", key: "repos" },
     { to: "/wiki", label: "Cognition", key: "wiki" },
   ];
