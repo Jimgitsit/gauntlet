@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { isIdle, onWake } from "./idle";
 import { BASE } from "./router";
 
 export class ApiError extends Error {
@@ -33,7 +34,11 @@ export function post<T>(path: string, body?: unknown): Promise<T> {
   return api<T>(path, { method: "POST", body: body === undefined ? undefined : JSON.stringify(body) });
 }
 
-/** Fetch on mount and whenever `key` changes; optionally poll. Holds the last good value while refetching. */
+/**
+ * Fetch on mount and whenever `key` changes; optionally poll. Holds the last good value while refetching.
+ * Polling pauses while the tab is hidden or nobody has interacted for a while (see idle.ts), and
+ * refetches at once when interaction resumes.
+ */
 export function useFetch<T>(path: string | null, opts: { pollMs?: number; key?: unknown } = {}): { data: T | null; error: string | null; loading: boolean; reload: () => void } {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -72,17 +77,22 @@ export function useFetch<T>(path: string | null, opts: { pollMs?: number; key?: 
         }
       });
     let timer: ReturnType<typeof setInterval> | null = null;
+    let unwake: (() => void) | null = null;
     if (opts.pollMs) {
       timer = setInterval(() => {
-        if (document.visibilityState === "visible") {
+        if (document.visibilityState === "visible" && !isIdle()) {
           setTick((t) => t + 1);
         }
       }, opts.pollMs);
+      unwake = onWake(() => setTick((t) => t + 1));
     }
     return () => {
       cancelled = true;
       if (timer) {
         clearInterval(timer);
+      }
+      if (unwake) {
+        unwake();
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
